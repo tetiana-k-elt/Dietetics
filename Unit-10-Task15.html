@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English for Dietetics – Task 15 (self-check)</title>
+<style>
+:root{--bg:#f6f7f4;--card:#fff;--ink:#1f2a24;--muted:#5d6b63;--line:#d5dcd6;--accent:#2f6f4f;--accent-soft:#e3f1ea;--ok:#1f7a42;--ok-bg:#dff3e6;--bad:#b3261e;--bad-bg:#fbe3e1;--sel:#ffe9a8}
+@media (prefers-color-scheme:dark){:root{--bg:#161b18;--card:#1f2622;--ink:#e8eee9;--muted:#9fb0a5;--line:#34403a;--accent:#6fc79a;--accent-soft:#26352d;--ok:#7fdca1;--ok-bg:#1f3a2a;--bad:#ff8f87;--bad-bg:#432421;--sel:#5b4a14}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif;line-height:1.75}
+.wrap{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+header{border-bottom:3px solid var(--accent);margin-bottom:16px;padding-bottom:6px}
+header small{font-family:Arial,sans-serif;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+h1{font-family:Arial,sans-serif;font-size:1.5rem;margin:2px 0}
+.instr{font-weight:bold;margin:12px 0}
+.bank{position:sticky;top:0;z-index:5;background:var(--card);border:2px solid var(--line);border-radius:8px;padding:10px;display:flex;flex-wrap:wrap;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.chip{font-family:Georgia,serif;font-size:.95rem;border:1px solid var(--accent);background:var(--accent-soft);color:var(--ink);border-radius:999px;padding:2px 12px;cursor:pointer;line-height:1.5;user-select:none;touch-action:manipulation}
+.chip.sel{background:var(--sel);outline:2px solid #c99a00}
+.chip.used{opacity:.3;pointer-events:none}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:14px 0;font-family:Arial,sans-serif}
+button.act{font:inherit;font-size:.9rem;border:0;border-radius:6px;padding:8px 16px;cursor:pointer;background:var(--accent);color:#fff}
+button.act.sec{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+#score{font-weight:bold;margin-left:auto}
+.dlg{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 18px}
+.turn{margin:0 0 8px;padding-left:1.6em;text-indent:-1.6em}
+.who{font-weight:bold}
+.gap{display:inline-block;min-width:150px;min-height:1.6em;vertical-align:baseline;margin:0 2px;padding:0 8px;border:0;border-bottom:2px dotted var(--muted);background:transparent;color:var(--ink);font:inherit;font-size:.95em;text-indent:0;text-align:center;cursor:pointer;border-radius:4px}
+.gap .n{font-family:Arial,sans-serif;font-size:.7em;color:var(--muted);margin-right:4px}
+.gap.over{background:var(--sel)}
+.gap.filled{border-bottom-style:solid;border-bottom-color:var(--accent);background:var(--accent-soft)}
+.gap.ok{background:var(--ok-bg);border-bottom-color:var(--ok);color:var(--ok);font-weight:bold}
+.gap.bad{background:var(--bad-bg);border-bottom-color:var(--bad);color:var(--bad)}
+.hint{font-family:Arial,sans-serif;font-size:.85rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><small>English for Dietetics</small><h1>Vocabulary practice and Listening – Task 15</h1></header>
+<p class="instr">An interview with a registered nutritionist. Complete the dialogue with the words in the box, next listen and check if your predictions have been correct.</p>
+<p class="hint">Click a word, then click a gap (or drag the word into the gap). Click a filled gap to take the word back.</p>
+
+<div class="bank" id="bank"></div>
+
+<div class="bar">
+<button class="act" id="check">Check</button>
+<button class="act sec" id="show">Show answers</button>
+<button class="act sec" id="reset">Reset</button>
+<span id="score"></span>
+</div>
+
+<div class="dlg" id="dlg"></div>
+</div>
+
+<script>
+const BANK=[
+["right food","right food"],["food additives","food additives"],["ready meals","ready meals"],["food poisoning","food poisoning"],
+["proper quality food","proper quality food"],["organic food","organic food"],["GM foods","GM foods"],["GM foods","GM foods"],
+["nourishing meals","nourishing meals"],["perishable food","perishable food"],["junk food","junk food"],["fast food","fast food"],
+["fresh produce","fresh produce"],["processed foods","processed foods"],["home-cooked meals","home-cooked meals"],
+["high-calorie, sugary convenience food","high-calorie, sugary convenience food"],["spoil your appetite","spoil your appetite"]
+];
+const ANS={1:"junk food",2:"fast food",3:"nourishing meals",4:"fresh produce",5:"organic food",6:"perishable food",7:"proper quality food",8:"processed foods",9:"ready meals",10:"home-cooked meals",11:"food additives",12:"high-calorie, sugary convenience food",13:"spoil your appetite",14:"GM foods",15:"right food",16:"food poisoning",17:"GM foods"};
+// [speaker, text with {n} gaps]
+const D=[
+["Journalist","Welcome to our daily programme “Hello, Happy Morning”. Today we have Martha Mealfood with us, an acknowledged expert in nutrition and dietary assessment, as well as an expert on feeding children."],
+["Martha","Hello, pleased to be here."],
+["Journalist","Martha, what is the major problem with kids and their diet?"],
+["Martha","Nowadays, children, adolescents in particular, consume far too much {1}."],
+["Journalist","{2} is a global and growing problem."],
+["Martha","Very much so. It is extremely hard to convince the teenagers to eat healthily, to..., to eat {3}."],
+["Journalist","Meals which are healthy and make you strong."],
+["Martha","Of course, {4} is good for them."],
+["Journalist","Foods grown on farms, like dairy and other agricultural produce."],
+["Martha","Exactly, fresh and {5} in particular."],
+["Journalist","But many people complain that this food is expensive and {6}."],
+["Martha","It is better to spend money on {7} than on long-term health treatments. {8}, for example, are likely to cause many preventable diseases and allergies. {9} should be substituted for {10}. Most importantly, {11}, which are unbelievably bad for our long-term health, have to be completely eliminated from kids’ diet. Unfortunately, children love {12} because substances added to it improve its taste and appearance. What is more, crisps, sweets or fizzy drinks {13}."],
+["Journalist","And {14}, are these foods really unhealthy?"],
+["Martha","There are different opinions about this problem, but I do not think it is the {15} for our kids. Certainly, they would not immediately cause {16} or other acute diseases, however extensive research is required to prove whether {17} are safe or not."],
+["Journalist","Thank you very much Martha for being our guest today."],
+["Martha","Thank you for inviting me here."]
+];
+
+const bank=document.getElementById('bank'),dlg=document.getElementById('dlg'),score=document.getElementById('score');
+let sel=null; const chips=[],gaps={};
+
+BANK.forEach(([key,label],i)=>{
+  const c=document.createElement('span');c.className='chip';c.textContent=label;c.draggable=true;c.dataset.key=key;c.dataset.i=i;
+  c.onclick=()=>{ if(c.classList.contains('used'))return; if(sel===c){c.classList.remove('sel');sel=null;return;} if(sel)sel.classList.remove('sel'); sel=c;c.classList.add('sel'); };
+  c.ondragstart=e=>{e.dataTransfer.setData('text/plain',i);};
+  chips.push(c);bank.appendChild(c);
+});
+
+D.forEach(([who,text])=>{
+  const p=document.createElement('p');p.className='turn';
+  p.innerHTML='<span class="who">'+who+':</span> ';
+  text.split(/(\{\d+\})/).forEach(part=>{
+    const m=part.match(/^\{(\d+)\}$/);
+    if(m){const n=+m[1];const g=document.createElement('button');g.className='gap';g.type='button';g.innerHTML='<span class="n">'+n+'.</span>';g.dataset.n=n;g.chip=null;
+      g.onclick=()=>{ if(sel){place(g,sel);} else if(g.chip){clear(g);} };
+      g.ondragover=e=>{e.preventDefault();g.classList.add('over');};
+      g.ondragleave=()=>g.classList.remove('over');
+      g.ondrop=e=>{e.preventDefault();g.classList.remove('over');place(g,chips[+e.dataTransfer.getData('text/plain')]);};
+      gaps[n]=g;p.appendChild(g);}
+    else p.appendChild(document.createTextNode(part));
+  });
+  dlg.appendChild(p);
+});
+
+function clear(g){ if(g.chip){g.chip.classList.remove('used');g.chip=null;} g.className='gap'; g.innerHTML='<span class="n">'+g.dataset.n+'.</span>'; score.textContent=''; }
+function render(g,label){ g.innerHTML='<span class="n">'+g.dataset.n+'.</span>'+label; }
+function place(g,c){
+  if(!c||c.classList.contains('used'))return;
+  clear(g); g.chip=c;c.classList.add('used');c.classList.remove('sel');sel=null;
+  g.classList.add('filled');render(g,c.textContent);
+}
+document.getElementById('check').onclick=()=>{
+  let ok=0;
+  for(const n in gaps){const g=gaps[n];
+    g.classList.remove('ok','bad');
+    if(!g.chip)continue;
+    if(g.chip.dataset.key===ANS[n]){g.classList.add('ok');ok++;}else g.classList.add('bad');
+  }
+  score.textContent='Score: '+ok+' / 17';
+};
+document.getElementById('show').onclick=()=>{
+  chips.forEach(c=>c.classList.remove('used','sel'));sel=null;
+  for(const n in gaps){gaps[n].chip=null;}
+  for(const n in gaps){const g=gaps[n];
+    const c=chips.find(x=>x.dataset.key===ANS[n]&&!x.classList.contains('used'));
+    g.chip=c;c.classList.add('used');g.className='gap ok';render(g,c.textContent);}
+  score.textContent='Answers shown';
+};
+document.getElementById('reset').onclick=()=>{ for(const n in gaps)clear(gaps[n]); chips.forEach(c=>c.classList.remove('used','sel')); sel=null; score.textContent=''; };
+</script>
+</body>
+</html>
